@@ -74,15 +74,15 @@ win32{
     QMAKE_LFLAGS += /INCREMENTAL:NO
 
     CONFIG(debug,debug|release){
-        LIBS += C:\\OpenCV\\2.4.11\build\\x86\\vc10\\lib\\opencv_core2411d.lib
-        LIBS += C:\\OpenCV\\2.4.11\build\\x86\\vc10\\lib\\opencv_highgui2411d.lib
-        LIBS += C:\\OpenCV\\2.4.11\build\\x86\\vc10\\lib\\opencv_imgproc2411d.lib
+        LIBS += C:\\OpenCV\\2.4.11\\build\\x86\\vc12\\lib\\opencv_core2411d.lib
+        LIBS += C:\\OpenCV\\2.4.11\\build\\x86\\vc12\\lib\\opencv_highgui2411d.lib
+        LIBS += C:\\OpenCV\\2.4.11\\build\\x86\\vc12\\lib\\opencv_imgproc2411d.lib
 
     }
 
     CONFIG(release,debug|release){
-        LIBS += C:\\OpenCV\\2.4.11\\build\\x86\\vc10\\lib\\opencv_core2411.lib
-        LIBS += C:\\OpenCV\\2.4.11\\build\\x86\\vc10\\lib\\opencv_highgui2411.lib
-        LIBS += C:\\OpenCV\\2.4.11\\build\\x86\\vc10\\lib\\opencv_imgproc2411.lib
+        LIBS += C:\\OpenCV\\2.4.11\\build\\x86\\vc12\\lib\\opencv_core2411.lib
+        LIBS += C:\\OpenCV\\2.4.11\\build\\x86\\vc12\\lib\\opencv_highgui2411.lib
+        LIBS += C:\\OpenCV\\2.4.11\\build\\x86\\vc12\\lib\\opencv_imgproc2411.lib
     }
 }
