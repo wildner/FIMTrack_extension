@@ -136,6 +136,15 @@ void Tracker::startTrackingSlot(const std::vector<std::vector<std::string>>& mul
         trackImgNoNumbersPath.append(".tif");
         OutputGenerator::drawTrackingResultsNoNumbers(QtOpencvCore::qstr2str(trackImgNoNumbersPath), imgPaths, _larvaeContainer.getAllLarvae());
 
+		// save distances between all tracked objects in an own file
+		QString distanceTablePath = absPath;
+		distanceTablePath.append("/distances");
+		distanceTablePath.append("_");
+		distanceTablePath.append(strDate);
+		distanceTablePath.append("_");
+		distanceTablePath.append(strTime);
+		distanceTablePath.append(".csv");
+		OutputGenerator::writeDistancesCSVFile(QtOpencvCore::qstr2str(distanceTablePath), _larvaeContainer.getAllLarvae(), numProcessed);
     }
 
     emit trackingDoneSignal();
@@ -308,6 +317,7 @@ void Tracker::extractRawLarvae(Mat const& img, Backgroundsubtractor const& bs, M
                                      GeneralParameters::iGrayThreshold,
                                      GeneralParameters::iMinLarvaeArea,
                                      GeneralParameters::iMaxLarvaeArea,
+									 GeneralParameters::iValleyThreshold,
                                      bs,
                                      checkRoiBorders);
 

@@ -49,10 +49,215 @@ SpineIPAN::~SpineIPAN()
     this->clear();
 }
 
+void SpineIPAN::calcContourCurvatures(contour_t* const _contour, contourCurvature_t & curvatures, contourCurvVectors_t & curvVectors, maxima_t & maximaIndices, minima_t & minimaIndices)
+{
+	this->clear();
+
+	// ############ PARAMETERS ##################
+	int dMin = 3;
+	int dMax = 4;
+	int distBetweenMaxima = 15; // is not applied if a minimum is between two maxima
+	unsigned int maskSize = 0; //(dMin % 2 == 0) ? dMin + 1 : dMin;
+
+	contour = _contour;
+
+	advancedFirstPass(curvatures, curvVectors, dMin, dMax);
+
+	calcCurvatureExtrema(_contour, curvatures, maximaIndices, minimaIndices, maskSize, distBetweenMaxima);
+}
+
+void SpineIPAN::advancedFirstPass(contourCurvature_t & curvatures, contourCurvVectors_t & curvVectors,unsigned int dMin, unsigned int dMax)
+{
+	assert(contour != nullptr);
+
+	// get the contour size
+	size_t contourSize = contour->size();
+
+	// for all points in the contour
+	for (int i = 0; i < (int)contourSize; ++i)
+	{
+		// get the current point
+		Point curPoint = contour->at(i);
+		// initialize the angle for the maximum curvature (smallest Angle) for this point with maximum value (i.e. 360 degree)
+		double maxCurvAngle = 360;
+		double minCurvAngle = 0;
+		Point successor;
+		Point predecessor;
+		cv::Vec2d orthVec;
+		// for all points in the contour with distance in [dMin, dMax]
+		for (int dist = dMin; dist <= dMax; ++dist)
+		{
+			//// get the predecessor point
+			//predecessor = calcPredecessorPointWithDistance(i, dist);
+			//// get the successor point
+			//successor = calcSuccessorPointWithDistance(i, dist);
+
+			// get the predecessor point
+			predecessor = contour->at(Calc::calcCircularContourNeighbourIndex(contourSize, i, -dist));
+			// get the successor point
+			successor = contour->at(Calc::calcCircularContourNeighbourIndex(contourSize, i, dist));
+
+
+			// calculate the current angle value given by the triangle (predecessor, curPoint, successor)
+			double curAngle = Calc::calcAngle(curPoint, predecessor, successor);
+			// is the current angle smaller?
+			if (curAngle < maxCurvAngle)
+			{
+				// update the angle
+				maxCurvAngle = curAngle;
+			}
+			else if (curAngle > minCurvAngle)
+			{
+				minCurvAngle = curAngle;
+			}
+			// calculation of the orthogonal vector
+			cv::Vec2d currOrthVec;
+			if (curAngle == 180) {
+				// calculate the orthogonal vector to the tangent (turn the vector predecessor->successor clockwise by 90 degree)
+				currOrthVec = Vec2d(successor.y - predecessor.y, -(successor.x - predecessor.x));
+				currOrthVec = cv::normalize(currOrthVec);
+			}
+			else
+			{
+				// calculate the vector orthogonal to the curvature tangent
+				cv::Vec2d predVec = Vec2d(predecessor.x - curPoint.x, predecessor.y - curPoint.y);
+				predVec = cv::normalize(predVec);
+				cv::Vec2d succVec = Vec2d(successor.x - curPoint.x, successor.y - curPoint.y);
+				succVec = cv::normalize(succVec);
+				currOrthVec = predVec + succVec;
+				currOrthVec = cv::normalize(currOrthVec);
+				if (curAngle > 180)
+				{
+					currOrthVec = -currOrthVec;
+				}
+			}
+			orthVec += currOrthVec;
+		}  // end for-loop for points within distance in [dMin, dMax]
+
+		// push the smallest found angle (if <= 180) or the biggest (if > 180) into the curvatures vector
+		curvatures.push_back(180 - maxCurvAngle < minCurvAngle - 180 ? minCurvAngle : maxCurvAngle);
+
+		orthVec = cv::normalize(orthVec);
+		curvVectors.push_back(orthVec);
+	}
+}
+
+void SpineIPAN::calcCurvatureExtrema(contour_t* const _contour, contourCurvature_t & curvatures, maxima_t & maximaIndices, minima_t & minimaIndices, unsigned int maskSize, int distBetweenMaxima)
+{
+	assert(contour != 0);
+
+	// ############ PARAMETERS ##################
+	int minimaThreshold = 240;
+	int maximaThreshold = 100;
+	int minDistBetweenMinima = 5; // number of pixels
+	int minDistBetweenMaxima = 6; // for one larva it should be something like: (int)(_contour->size() / 4);
+
+	// guarantee odd mask size
+	maskSize = (maskSize % 2 == 0) ? maskSize + 1 : maskSize;
+
+	// get the amount of points left / right from the mask center
+	int moveLeftRight = (int)maskSize / 2;
+
+	// initialize the meanBestCurvature with maximal curvature value (i.e. 360 degree)
+	double meanMaxCurv = 360;
+	// initialize the maxIndex (i.e. index with sharpest angle for the given mask)
+	int maxIndex = 0;
+
+	double meanMinCurv = 0;
+	int minIndex = 0;
+
+	double prevMinMeanCurv = 0;
+	double prevMaxMeanCurv = 360;
+	int prevMinIndex = -1 - minDistBetweenMinima;
+	int prevMaxIndex = -1 - minDistBetweenMaxima;
+
+	// for all contour points
+	for (int contourPointNo = 0; contourPointNo < (int)contour->size(); ++contourPointNo)
+	{
+		// set the current mean curvature to 0
+		double curMeanCurvature = 0;
+		// for all points within the mask (i.e. [-moveLeftRight, moveLeftRight])
+		for (int offset = -moveLeftRight; offset <= moveLeftRight; ++offset)
+		{
+			// get the (circular) index
+			int curIndex = Calc::calcCircularContourNeighbourIndex(contour->size(), contourPointNo, offset);
+			// add the current curvature to the current mean curMeanCurvature
+			curMeanCurvature += curvatures.at(curIndex);
+		}
+
+		// normalize the curMeanCurvature to get the real mean
+		curMeanCurvature /= maskSize;
+
+		// look for a maximum (high convex curvature)
+		if (curMeanCurvature < maximaThreshold && (maximaIndices.empty() || contourPointNo < (int)contour->size() + maximaIndices[0] - minDistBetweenMaxima))
+		{
+			// check distance to previous maximum
+			if (contourPointNo - prevMaxIndex > minDistBetweenMaxima)
+			{
+				// add new maximum to the list
+				maximaIndices.push_back(contourPointNo);
+				prevMaxIndex = contourPointNo;
+				prevMaxMeanCurv = curMeanCurvature;
+			}
+			else
+			{
+				if (!maximaIndices.empty() && curMeanCurvature < prevMaxMeanCurv)
+				{
+					// better maximum found, close to the previous one - overwrite old maximum
+					maximaIndices[maximaIndices.size() - 1] = contourPointNo;
+					prevMaxIndex = contourPointNo;
+					prevMaxMeanCurv = curMeanCurvature;
+				}
+			}
+		}
+		// look for a minimum (high concave curvature)
+		if (curMeanCurvature > minimaThreshold && (minimaIndices.empty() || contourPointNo < (int)contour->size() + minimaIndices[0] - minDistBetweenMinima))
+		{
+			// check distance to previous minimum
+			if (contourPointNo - prevMinIndex > minDistBetweenMinima)
+			{
+				minimaIndices.push_back(contourPointNo);
+				prevMinIndex = contourPointNo;
+				prevMinMeanCurv = curMeanCurvature;
+			}
+			else
+			{
+				if (!minimaIndices.empty() && curMeanCurvature > prevMinMeanCurv)
+				{
+					// better minimum found, close to the previous one - overwrite old minimum
+					minimaIndices[minimaIndices.size() - 1] = contourPointNo;
+					prevMinIndex = contourPointNo;
+					prevMinMeanCurv = curMeanCurvature;
+				}
+			}
+		}
+
+		// is the current curvature smaller than the best mean curvature?
+		if (curMeanCurvature < meanMaxCurv)
+		{
+			// update the best mean curvature
+			meanMaxCurv = curMeanCurvature;
+			// update the bestIndex
+			maxIndex = contourPointNo;
+		}
+		if (curMeanCurvature > meanMinCurv)
+		{
+			meanMinCurv = curMeanCurvature;
+			minIndex = contourPointNo;
+		}
+	}
+
+	// store the max index (with sharpest angle within the mask)
+	maxCurvatureIndex = maxIndex;
+
+	minCurvatureIndex = minIndex;
+}
+
 void SpineIPAN::calcSpineParameters(contour_t* const _contour,
                                     spineF_t* const _spine,
                                     spine_t* const _discreteSpine,
                                     radii_t* const _animalRadii,
+									std::vector<double> &_larvaThicknessVector,
                                     unsigned int &_tailIndex,
                                     double &_spineLength,
                                     unsigned int _dMin,
@@ -72,7 +277,7 @@ void SpineIPAN::calcSpineParameters(contour_t* const _contour,
     ipanFirstPass(_dMin, _dMax);
 
     // calculate index of point with max curvature
-    calcMaxCurvatureIndex(_maskSize);
+	calcMaxCurvatureIndex(_maskSize);
 
     // reorder members 'contour' and 'curvatures' that first point is the one with maximum curvature
     reorderParameters();
@@ -80,8 +285,13 @@ void SpineIPAN::calcSpineParameters(contour_t* const _contour,
     // calculate index with second maximum curvature
     calcSecondMaxCurvatureIndexOrdered(_maskSize, _distToMax);
 
+	// FOR FISH: SWAP HEAD AND TAIL (because maximum curvature of a fish is at the tail and not at the head)
+	maxCurvatureIndex = secondMaxCurvatureIndex;
+	reorderParameters();
+	secondMaxCurvatureIndex = contour->size() - secondMaxCurvatureIndex;
+
     // calculate all spine points
-    calcSpine();
+	calcSpine(_larvaThicknessVector);
 
     // calculate nPoints on the spine for the discrete spine
     calcDiscreteSpine(_nPoints, _spineLength);
@@ -124,6 +334,12 @@ void SpineIPAN::ipanFirstPass(unsigned int dMin, unsigned int dMax){
             Point successor = calcSuccessorPointWithDistance(i, dist);
             // get the predecessor point
             Point predecessor = calcPredecessorPointWithDistance(i, dist);
+
+			//// get the predecessor point
+			//Point predecessor = contour->at(Calc::calcCircularContourNeighbourIndex(contourSize, i, -dist));
+			//// get the successor point
+			//Point successor = contour->at(Calc::calcCircularContourNeighbourIndex(contourSize, i, dist));
+
             // calculate the current angle value given by the triangle (predecessor, curPoint, successor)
             double curAngle = Calc::calcAngle(curPoint, predecessor, successor);
             // is the current angle smaller?
@@ -184,8 +400,6 @@ void SpineIPAN::calcMaxCurvatureIndex(unsigned int maskSize){
 
     // store the best index (with sharpest angle within the mask)
     maxCurvatureIndex = bestIndex;
-
-    reorderParameters();
 }
 
 void SpineIPAN::calcSecondMaxCurvatureIndexOrdered(unsigned int maskSize, double distToMax){
@@ -237,7 +451,7 @@ void SpineIPAN::calcSecondMaxCurvatureIndexOrdered(unsigned int maskSize, double
     secondMaxCurvatureIndex = secondBestIndex;
 }
 
-void SpineIPAN::calcSpine(){
+void SpineIPAN::calcSpine(std::vector<double> &_larvaThicknessVector){
 
     assert(contour!=nullptr);
     assert(spine!=nullptr);
@@ -341,7 +555,7 @@ void SpineIPAN::calcSpine(){
         cv::Point lastSecondHalfPoint = reverseSecondDiscreteHalf.at(0);
         cv::Point2f tailPoint = contour->at(secondMaxCurvatureIndex);
         // for all discrete contour half points
-        for(unsigned int i = 1; i<firstDiscreteHalf.size(); ++i)
+        for(unsigned int i = 1; i < firstDiscreteHalf.size(); ++i)
         {
             cv::Point curFirstHalfPoint = firstDiscreteHalf.at(i);
             cv::Point curSecondHalfPoint = reverseSecondDiscreteHalf.at(i);
@@ -376,6 +590,10 @@ void SpineIPAN::calcSpine(){
             {
                 break;
             }
+			else
+			{
+				_larvaThicknessVector.push_back(Calc::eucledianDist(curFirstHalfPoint, curSecondHalfPoint));
+			}
 
             // refresh last points
             lastSpinePoint1 = lastSpinePoint2;
@@ -690,4 +908,13 @@ void SpineIPAN::calcDistanceMaps(uint gridSize)
     imgSecondHalf.release();
     imgFirstHalf.release();
     contourContainer.clear();
+}
+
+template<class T> std::vector<T> SpineIPAN::reverseVec(std::vector<T> const& v)
+{
+	std::vector<T> retVec;
+	retVec.reserve(v.size());
+	std::reverse_copy(v.begin(), v.end(), std::back_inserter(retVec));
+
+	return retVec;
 }

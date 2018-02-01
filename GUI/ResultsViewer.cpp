@@ -136,7 +136,7 @@ void ResultsViewer::showTable(const int index)
             {
                 if(mLarvaeContainer.getLarva(cols, l))
                 {
-                    QString hHeader("larva(");
+                    QString hHeader("fish(");
                     hHeader.append(QString::number(l.getID()));
                     hHeader.append(")");
                     tableModel->setHorizontalHeaderItem(cols, new QStandardItem(hHeader));

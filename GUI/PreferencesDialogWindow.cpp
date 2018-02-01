@@ -218,7 +218,7 @@ void PreferencesDialogWindow::setParameters()
 
     this->ui->doubleSpinBoxCoiledRecognitionParametersPerimeterToSpinelenghtThreshold->setEnabled(!this->ui->checkBoxLarvaeExtactionParameterUseDefauilt->isChecked());
     this->ui->doubleSpinBoxCoiledRecognitionParametersMidcirclePerimeterToPerimeterThreshold->setEnabled(!this->ui->checkBoxLarvaeExtactionParameterUseDefauilt->isChecked());
-    this->ui->doubleSpinBoxCoiledRecognitionParametersMaxToMeanRadiusThreshold->setEnabled(!this->ui->checkBoxLarvaeExtactionParameterUseDefauilt);
+    this->ui->doubleSpinBoxCoiledRecognitionParametersMaxToMeanRadiusThreshold->setEnabled(!this->ui->checkBoxLarvaeExtactionParameterUseDefauilt->isChecked());
 
     /* Stop and Go calculation */
     this->ui->spinBoxStopAndGoFramesForSpeedCalc->setEnabled(!this->ui->checkBoxLarvaeExtactionParametersUseDynamicStopAndGo->isChecked());
@@ -241,31 +241,18 @@ void PreferencesDialogWindow::updateBackgroungSpinboxesValues(unsigned int iNumb
 {
     if(iNumberOfFiles > 0)
     {
-        BackgroundSubstraction::iFromImage = 0;
         this->ui->spinBoxBackgroundSubstractionFromImage->setMinimum(0);
-        this->ui->spinBoxBackgroundSubstractionFromImage->setMaximum(iNumberOfFiles - 1);
+		this->ui->spinBoxBackgroundSubstractionFromImage->setMaximum(INT_MAX);
+
+		if (BackgroundSubstraction::iOffset < 1)
+		{
+			BackgroundSubstraction::iOffset = std::max(1, (int)round(iNumberOfFiles / 20.0));
+		}
+		this->ui->spinBoxBackgroundSubstractionOffset->setMinimum(1);
+		this->ui->spinBoxBackgroundSubstractionOffset->setMaximum(INT_MAX);
         
-        BackgroundSubstraction::iOffset = 1;
-        this->ui->spinBoxBackgroundSubstractionOffset->setMinimum(1);
-        this->ui->spinBoxBackgroundSubstractionOffset->setMaximum(iNumberOfFiles - 1);
-        
-        BackgroundSubstraction::iToImage = iNumberOfFiles;
         this->ui->spinBoxBackgroundSubstractionToImage->setMinimum(1);
-        this->ui->spinBoxBackgroundSubstractionToImage->setMaximum(iNumberOfFiles);
-    }
-    else
-    {
-        BackgroundSubstraction::iFromImage = 0;
-        this->ui->spinBoxBackgroundSubstractionFromImage->setMinimum(0);
-        this->ui->spinBoxBackgroundSubstractionFromImage->setMaximum(0);
-        
-        BackgroundSubstraction::iOffset = 0;
-        this->ui->spinBoxBackgroundSubstractionOffset->setMinimum(0);
-        this->ui->spinBoxBackgroundSubstractionOffset->setMaximum(0);
-        
-        BackgroundSubstraction::iToImage = 0;
-        this->ui->spinBoxBackgroundSubstractionToImage->setMinimum(0);
-        this->ui->spinBoxBackgroundSubstractionToImage->setMaximum(0);
+		this->ui->spinBoxBackgroundSubstractionToImage->setMaximum(INT_MAX);
     }
 }
 

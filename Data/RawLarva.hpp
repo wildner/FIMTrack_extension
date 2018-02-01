@@ -76,6 +76,7 @@ public:
     cv::Point getMomentum(void) const {return momentum;}
     double getArea(void) const {return area;}
     std::vector<double> getLarvalRadii(void) const {return larvalRadii;}
+	std::vector<double> getLarvaThicknessVector(void) const { return larvaThicknessVector; }
     double getSpineLength(void) const {return spineLength;}
     double getContourPerimeter(void) const {return arcLength(contour,true);}
     bool getIsBezierSpine(void) const{return bezierSpine;}
@@ -118,7 +119,11 @@ private:
      * @brief larvalRadii stores the radii of the discrete spine points. First (head) and last (tail) radii are 0;
      *          radii inbetween are >0.
      */
-    std::vector<double> larvalRadii;
+	std::vector<double> larvalRadii;
+	/**
+	* @brief larvaThicknessVector stores the thickness of the larva for each spine point in "spine"
+	*/
+	std::vector<double> larvaThicknessVector;
     /**
      * @brief tailIndex index of contour point, that represents the tail
      *        Annotation: head index is always 0

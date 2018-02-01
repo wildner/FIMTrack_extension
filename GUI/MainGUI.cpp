@@ -95,6 +95,16 @@ MainGUI::MainGUI(QWidget *parent) :
         this->setupBaseGUIElements(false);
         this->showMaximized();
         emit logMessage("FIMTrack started!", INFO);
+
+		// preload the config which was used in the previous run - if available
+		this->autoLoadConfig();
+
+		// preload a fixed set of images
+		//this->autoLoadImages();
+
+		// hide valley threshold (currently not used)
+		this->ui->spinBox_valleyThresh->setVisible(false);
+		this->ui->label_4->setVisible(false);
     }
     catch(cv::Exception& e)
     {
@@ -104,7 +114,10 @@ MainGUI::MainGUI(QWidget *parent) :
 
 MainGUI::~MainGUI()
 {
-    emit logMessage("Program terminated!", DEBUG);
+	emit logMessage("Program terminated!", DEBUG);
+
+	// store the preferences so that they can be loaded the next time the program starts
+	this->autoSaveConfig();
     
     delete this->ui;
     
@@ -136,7 +149,7 @@ void MainGUI::on_btnLoad_clicked()
     QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Open Image Files"), "", QString::fromStdString(StringConstats::fileFormats));
     if(!fileNames.isEmpty())
     {
-        QCollator col;
+		QCollator col;
         col.setNumericMode(true); // THIS is important. This makes sure that numbers are sorted in a human natural way!
         col.setCaseSensitivity(Qt::CaseInsensitive);
         std::sort(fileNames.begin(), fileNames.end(), [&](const QString& a, const QString& b) {
@@ -145,8 +158,27 @@ void MainGUI::on_btnLoad_clicked()
         this->_fileNames = fileNames;
         this->updateTreeViewer();
         this->setupBaseGUIElements(true);
-        this->showImage(this->_fileNames.first());
+        //this->showImage(this->_fileNames.first());
     }
+}
+
+void MainGUI::autoLoadImages()
+{
+	// example:
+	QStringList fileNames = (QStringList() << "../images/example_images_guppy/GOPR0633_img000070.tif"
+		<< "../images/example_images_guppy/GOPR0633_img000071.tif"
+		<< "../images/example_images_guppy/GOPR0633_img000072.tif");
+
+	QCollator col;
+	col.setNumericMode(true); // THIS is important. This makes sure that numbers are sorted in a human natural way!
+	col.setCaseSensitivity(Qt::CaseInsensitive);
+	std::sort(fileNames.begin(), fileNames.end(), [&](const QString& a, const QString& b) {
+		return col.compare(a, b) < 0;
+	});
+	this->_fileNames = fileNames;
+	this->updateTreeViewer();
+	this->setupBaseGUIElements(true);
+	//this->showImage(this->_fileNames.first());
 }
 
 void MainGUI::showImage(QString path)
@@ -174,8 +206,49 @@ void MainGUI::showImage(QString path)
             QMessageBox::information(this, "Information", QString("Can't undistore image"));
             return;
         }
-    }
-    
+	}
+
+	// prepare calculation of the background image or reuse the previous one if an image of the same folder is selected
+	std::vector<std::string> imgPaths;
+	cv::Mat currentBackgroundImage;
+	if (this->ui->treeView->topLevelItemCount() > 0)
+	{
+		QList<QTreeWidgetItem *> items = ui->treeView->selectedItems();
+		if (items.size() == 1)
+		{
+			QTreeWidgetItem *item = items.at(0);
+			if (item->parent())
+			{
+				int i = this->ui->treeView->indexOfTopLevelItem(item->parent());
+				if (i == this->_previousSelectedIndex)
+				{
+					// an image in the same image folder is selected; background image can be reused
+					currentBackgroundImage = this->_previousBackgroundImage;
+				}
+				else
+				{
+					// background image needs to be calculated; sum up all image paths of the folder
+					for (int j = 0; j < this->ui->treeView->currentItem()->parent()->childCount(); j++)
+					{
+						QString path = this->ui->treeView->currentItem()->parent()->text(1);
+						path.append("/");
+						path.append(this->ui->treeView->currentItem()->parent()->child(j)->text(1));
+						imgPaths.push_back(QtOpencvCore::qstr2str(path));
+					}
+					// calculate the background image
+					Backgroundsubtractor currentBS(imgPaths, this->_undistorter);
+					// store background image so that in can be reused
+					this->_previousBackgroundImage = currentBS.getBackgroundImage();
+					currentBackgroundImage = currentBS.getBackgroundImage();
+					this->_previousSelectedIndex = i;
+				}
+			}
+			else return;
+		}
+		else return;
+	}
+	Backgroundsubtractor bs(currentBackgroundImage);
+
     // generate a contours container
     contours_t contours;
     
@@ -187,16 +260,19 @@ void MainGUI::showImage(QString path)
                                     collidedContours, 
                                     GeneralParameters::iGrayThreshold, 
                                     GeneralParameters::iMinLarvaeArea, 
-                                    GeneralParameters::iMaxLarvaeArea);
+                                    GeneralParameters::iMaxLarvaeArea,
+									GeneralParameters::iValleyThreshold,
+									bs);
     
-    cv::Mat grayImg = img.clone();
+	cv::Mat grayImg = img.clone();
     
     // set the color to BGR to draw contours and contour sizes into the image
     cv::cvtColor(img, img, cv::COLOR_GRAY2BGR);
     
     // draw contours into the image
-    cv::drawContours(img,contours,-1, Scalar(255,0,0), 6);
-    cv::drawContours(img,collidedContours,-1,Scalar(0,0,255), 8);
+    cv::drawContours(img,contours,-1, Scalar(80, 255, 0), 0);
+    //cv::drawContours(img,collidedContours,-1,Scalar(0,170,255), CV_FILLED, 0); // filled contours
+	cv::drawContours(img, collidedContours, -1, Scalar(0, 170, 255), 0); //contours only
     
     // draw contour sizes into the image
     for(auto const& c : contours)
@@ -209,7 +285,7 @@ void MainGUI::showImage(QString path)
         ss << currentContourSize;
         
         // draw the contour size into the image
-        cv::putText(img, ss.str(), c.at(0), cv::FONT_HERSHEY_PLAIN, 3, Scalar(255,255,0), 4);
+        cv::putText(img, ss.str(), c.at(0), cv::FONT_HERSHEY_PLAIN, 1, Scalar(255,255,0), 1);
         
         // draw raw larval informations
         // generate a RawLarva Object
@@ -228,18 +304,18 @@ void MainGUI::showImage(QString path)
             color = Scalar(0,255,255);
         
         // draw the sharpest contour point
-        cv::circle(img,discreteSpine.at(0),2,Scalar(0,0,255),2);
+        cv::circle(img,discreteSpine.at(0),2,Scalar(0,0,255),CV_FILLED);
         
-        // draw the spine points
-        for (unsigned int i=1; i<discreteSpine.size()-1; ++i)
-        {
-            cv::circle(img,discreteSpine.at(i),larvalRadii.at(i),color,2);
-        }
+        //// draw the spine points
+        //for (unsigned int i=1; i<discreteSpine.size()-1; ++i)
+        //{
+        //    cv::circle(img,discreteSpine.at(i),larvalRadii.at(i),color,2);
+        //}
         
         // draw the second sharpest contour point
-        cv::circle(img,discreteSpine.at(discreteSpine.size()-1), 2, Scalar(0,255,0),2);
+		cv::circle(img, discreteSpine.at(discreteSpine.size() - 1), 2, Scalar(255, 0, 0), CV_FILLED);
     }
-    
+
     QImage qimg = QtOpencvCore::img2qimg(img);
     
     // convert the opencv image to a QPixmap (to show in a QLabel)
@@ -295,6 +371,8 @@ void MainGUI::on_btnDelete_clicked()
         {
             this->_scene->clearScene();
         }
+
+		this->_previousSelectedIndex = INT_MIN;
     }
     
     if(this->ui->treeView->topLevelItemCount() == 0)
@@ -307,7 +385,7 @@ void MainGUI::on_btnDelete_clicked()
 // button "Reset All Jobs"
 void MainGUI::on_btnReset_clicked()
 {
-    this->resetListViewe();
+	this->resetListViewe();
 }
 
 void MainGUI::on_btnTrack_clicked()
@@ -325,6 +403,9 @@ void MainGUI::on_btnTrack_clicked()
         
         msg.append(" MaxSizeThresh:");
         msg.append(QString::number(this->ui->spinBox_maxSizeThresh->value()));
+
+		msg.append(" ValleyThresh:");
+		msg.append(QString::number(this->ui->spinBox_valleyThresh->value()));
         emit logMessage(msg,DEBUG);
         
         this->ui->btnTrack->setText(QString("Stop"));
@@ -335,6 +416,7 @@ void MainGUI::on_btnTrack_clicked()
         this->ui->spinBox_graythresh->setEnabled(false);
         this->ui->spinBox_maxSizeThresh->setEnabled(false);
         this->ui->spinBox_minSizeThresh->setEnabled(false);
+		this->ui->spinBox_valleyThresh->setEnabled(false);
         this->ui->progressBar->setEnabled(true);
         this->ui->treeView->setEnabled(false);
         
@@ -368,6 +450,7 @@ void MainGUI::readParameters()
     GeneralParameters::iGrayThreshold = this->ui->spinBox_graythresh->value();
     GeneralParameters::iMinLarvaeArea = this->ui->spinBox_minSizeThresh->value();
     GeneralParameters::iMaxLarvaeArea = this->ui->spinBox_maxSizeThresh->value();
+	GeneralParameters::iValleyThreshold = this->ui->spinBox_valleyThresh->value();
     GeneralParameters::bShowTrackingProgress = this->ui->checkBoxShowTrackingProgress->isChecked();
 }
 
@@ -384,6 +467,8 @@ void MainGUI::setupBaseGUIElements(bool enable)
     this->ui->spinBox_maxSizeThresh->setValue(GeneralParameters::iMaxLarvaeArea);
     this->ui->spinBox_minSizeThresh->setEnabled(enable);
     this->ui->spinBox_minSizeThresh->setValue(GeneralParameters::iMinLarvaeArea);
+	this->ui->spinBox_valleyThresh->setEnabled(enable);
+	this->ui->spinBox_valleyThresh->setValue(GeneralParameters::iValleyThreshold);
     
     this->ui->checkBoxShowTrackingProgress->setEnabled(enable);
     this->ui->checkBoxShowTrackingProgress->setChecked(GeneralParameters::bShowTrackingProgress);
@@ -437,8 +522,11 @@ void MainGUI::trackingDoneSlot()
         this-> ui->spinBox_graythresh->setEnabled(true);
         this-> ui->spinBox_maxSizeThresh->setEnabled(true);
         this->ui->spinBox_minSizeThresh->setEnabled(true);
+		this->ui->spinBox_valleyThresh->setEnabled(true);
         this->ui->treeView->setEnabled(true);
         this->ui->progressBar->setEnabled(false);
+
+		this->_previousSelectedIndex = INT_MIN;
     }
     catch(...)
     {
@@ -503,6 +591,8 @@ void MainGUI::resetListViewe()
     this->setupBaseGUIElements(false);
     
     emit setBackgroundSpinboxesValues(0);
+
+	this->_previousSelectedIndex = INT_MIN;
 }
 
 void MainGUI::showMessage(QString msg)
@@ -513,7 +603,9 @@ void MainGUI::showMessage(QString msg)
 void MainGUI::on_actionPreferences_triggered()
 {
     try
-    {
+	{
+		this->_previousSelectedIndex = INT_MIN;
+
         emit updatePreferenceParameter();
         this->_preferencesDialogWindow->show();
     }
@@ -610,6 +702,19 @@ void MainGUI::on_actionSave_As_triggered()
     }
 }
 
+void MainGUI::autoSaveConfig()
+{
+	try
+	{
+		// save preferences so that they can be loaded the next time the program starts
+		OutputGenerator::saveConfiguration(QtOpencvCore::qstr2str(this->_configAutoSaveDirectory));
+	}
+	catch (...)
+	{
+		emit logMessage(QString("Fatal Error in MainGUI::autoSaveConfig"), FATAL);
+	}
+}
+
 void MainGUI::on_actionOpen_triggered()
 {
     try
@@ -630,12 +735,39 @@ void MainGUI::on_actionOpen_triggered()
                 this->ui->labelCameraParameter->setText("No Cameraparameter");
             }
             this->setupBaseGUIElements(true);
+
+			this->_previousSelectedIndex = INT_MIN;
         }
     }
     catch(...)
     {
         emit logMessage(QString("Fatal Error in MainGUI::on_actionLoad_Camera_Setting_triggered"), FATAL);
     }
+}
+
+void MainGUI::autoLoadConfig()
+{
+	try
+	{
+		// try to load the configuration file which were stored during closing the program
+		InputGenerator::loadConfiguration(QtOpencvCore::qstr2str(this->_configAutoSaveDirectory));
+
+		/* Restore Cameraparameters if there are some */
+		if (!CameraParameter::File.isNull() && !CameraParameter::File.isEmpty())
+		{
+			this->initUndistorer(CameraParameter::File);
+		}
+		else
+		{
+			this->ui->labelCameraParameter->setStyleSheet("QLabel {color : red; }");
+			this->ui->labelCameraParameter->setText("No Cameraparameter");
+		}
+		this->setupBaseGUIElements(true);
+	}
+	catch (...)
+	{
+		emit logMessage(QString("Fatal Error in MainGUI::autoLoadConfig"), WARNING);
+	}
 }
 
 void MainGUI::on_actionNew_triggered()

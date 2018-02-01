@@ -46,7 +46,7 @@
 
 namespace Calc
 {
-
+	
     /**
     * @brief normL2 calculates the L2-norm for a 2D point pt
     * @param pt is a 2D point for L2-norm calculation
@@ -64,6 +64,11 @@ namespace Calc
      */
     template<class T>
     cv::Point_<T> scale(cv::Point_<T> const& pt, T newLength);
+
+	/**
+	* @brief medianOfVector calculates the median of a double vector
+	*/
+	double medianOfVector(std::vector<double> vec);
 
     /**
     * @brief eucledianDist calculates the eucledean distance between two 2D points
@@ -191,6 +196,23 @@ namespace Calc
      */
     unsigned int calcCircularContourNeighbourIndex(const size_t& contourSize, const unsigned int& pos, const int& offset);
 
+	/**
+	* @brief calcCircularPixelNeighbourVector calculates, in a given pixel neighbourhood around
+	* a pixel, the vector which is rotated by a given offset (number of pixels to walk clockwise/counter-clockwise)
+	*/
+	cv::Vec2i calcCircularPixelNeighbourVector(std::vector<cv::Vec2i> & pixelNeighbourhood, cv::Vec2i & currentVec, const int & offset);
+
+	/**
+	* @brief calcCircularPixelNeighbourPoint calculates, in a given pixel neighbourhood around
+	* a pixel, the point which is shifted by a given offset (number of pixels to walk clockwise/counter-clockwise)
+	*/
+	cv::Point calcCircularPixelNeighbourPoint(std::vector<cv::Vec2i> & pixelNeighbourhood, cv::Vec2i & currentVec, cv::Point & currentPoint, const int & offset);
+
+	/**
+	* @brief calcDiscreteDirectionVector calculates the discrete direction vector pointing to the direct neighbourhood of a pixel
+	*/
+	cv::Vec2i calcDiscreteDirectionVector(cv::Vec2d & continuousVec2d);
+
     /**
      * @brief leftTurn finds out if the sequence of the three points p1, p2, p3 (traversed in this very order) indicates
      *        a left turn.
@@ -227,6 +249,11 @@ namespace Calc
      */
     QPointF getClosestPointOnLinesegment(QPointF const& p, QLineF const& l);
     double calcInnerAngleOfVectors(QPointF const& v1, QPointF const& v2);
+
+	/**
+	* @brief calcMinContourIndexDistance calculates the smallest distance between two indices on a circular vector like a contour
+	*/
+	int calcContourIndexDistance(int const contourLength, int const idx1, int const idx2);
 }
 
 #endif // CALC_HPP

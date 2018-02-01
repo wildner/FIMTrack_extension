@@ -52,7 +52,7 @@
       </font>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabStandard">
       <attribute name="title">
@@ -69,8 +69,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>558</width>
-            <height>729</height>
+            <width>556</width>
+            <height>736</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout">
@@ -158,7 +158,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Enable Detailet Output</string>
+              <string>Enable Detailed Output</string>
              </property>
             </widget>
            </item>
@@ -334,8 +334,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>542</width>
-            <height>969</height>
+            <width>537</width>
+            <height>812</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_13">
@@ -508,7 +508,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Larvae Extraction Parameters:</string>
+              <string>Fish Extraction Parameters:</string>
              </property>
             </widget>
            </item>
@@ -566,7 +566,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Minimal Triangel Side Lenght </string>
+              <string>Minimal Triangle Side Lenght </string>
              </property>
             </widget>
            </item>
@@ -580,7 +580,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Coiled Recognition Parameters:</string>
+              <string>Contour Filtering Parameters:</string>
              </property>
             </widget>
            </item>
@@ -606,7 +606,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Maximal Triangel Side Lenght </string>
+              <string>Maximal Triangle Side Lenght </string>
              </property>
             </widget>
            </item>
@@ -701,7 +701,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Background Substraction Parameters:</string>
+              <string>Background Subtraction Parameters:</string>
              </property>
             </widget>
            </item>
@@ -831,7 +831,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Perimeter To Spinelenght Threshold</string>
+              <string>Max Length to Thickness Threshold</string>
              </property>
             </widget>
            </item>
@@ -857,7 +857,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Midcircle Perimeter To Perimeter Threshold</string>
+              <string>Max Spine Length Threshold</string>
              </property>
             </widget>
            </item>
@@ -1204,7 +1204,7 @@
            <item row="11" column="0">
             <widget class="QLabel" name="label_17">
              <property name="text">
-              <string>Max To Mean Radius Threshold</string>
+              <string>Max to Mean Thickness Threshold</string>
              </property>
             </widget>
            </item>

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1281</width>
+    <width>1299</width>
     <height>814</height>
    </rect>
   </property>
@@ -34,13 +34,13 @@
          <widget class="QTreeWidget" name="treeView">
           <property name="minimumSize">
            <size>
-            <width>200</width>
+            <width>310</width>
             <height>620</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>310</width>
+            <width>350</width>
             <height>16777215</height>
            </size>
           </property>
@@ -168,22 +168,6 @@
            <number>10</number>
           </property>
           <item>
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
            <widget class="QLabel" name="label">
             <property name="font">
              <font>
@@ -215,7 +199,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
+              <width>30</width>
               <height>20</height>
              </size>
             </property>
@@ -229,7 +213,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Min Larvae Area</string>
+             <string>Min Fish Area</string>
             </property>
            </widget>
           </item>
@@ -253,7 +237,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
+              <width>30</width>
               <height>20</height>
              </size>
             </property>
@@ -267,7 +251,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Max Larvae Area</string>
+             <string>Max Fish Area</string>
             </property>
            </widget>
           </item>
@@ -291,7 +275,40 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
+              <width>30</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Valley Threshold</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spinBox_valleyThresh">
+            <property name="maximum">
+             <number>255</number>
+            </property>
+            <property name="value">
+             <number>100</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>30</width>
               <height>20</height>
              </size>
             </property>
@@ -388,8 +405,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1281</width>
-     <height>22</height>
+     <width>1299</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

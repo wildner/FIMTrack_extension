@@ -84,7 +84,14 @@ public:
                                              std::vector<std::string> const& imgPaths,
                                              std::vector<Larva> const& larvae);
     
-    static void saveResultImage(QString const& path, QImage const& img);
+	static void saveResultImage(QString const& path, QImage const& img);
+
+	/**
+	* @brief writeDistancesCSVFile exports all distances between all objects on every frame
+	*/
+	static void writeDistancesCSVFile(std::string const& path,
+									  std::vector<Larva> const& larvae,
+									  size_t movieLength);
     
 private:
     static bool getTimeIntervall(std::vector<Larva> const& larvae, std::pair<int, int>& timeInterval);

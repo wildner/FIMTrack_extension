@@ -112,6 +112,7 @@ void InputGenerator::loadConfiguration(const std::string& path)
         in["iGrayThreshold"]            >> GeneralParameters::iGrayThreshold;
         in["iMaxLarvaeArea"]            >> GeneralParameters::iMaxLarvaeArea;
         in["iMinLarvaeArea"]            >> GeneralParameters::iMinLarvaeArea;
+		in["iValleyThreshold"]			>> GeneralParameters::iValleyThreshold;
 
         /* Read CameraParameter */
         in["dFSP"]          >> CameraParameter::dFPS;

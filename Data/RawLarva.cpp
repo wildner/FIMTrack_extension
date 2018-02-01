@@ -47,11 +47,11 @@ RawLarva::RawLarva(const contour_t& _contour, Mat const & img)
     area = contourArea(contour);
 
     // number of discrete spine points
-    int nPoints = 5;
+    int nPoints = 9;
 
     // setting the relative distToMax value for secondMaxCurvaturePoint calculation (at least
-    // 25% away from the first curvature maximum
-    double distToMax = 0.25;
+    // 30% away from the first curvature maximum
+    double distToMax = 0.30;
 
     // dMin and dMax values for the IPAN algorithm (i.e. curvature calculation)
     int dMin = contour.size() * 0.06;
@@ -86,6 +86,7 @@ RawLarva::RawLarva(const contour_t& _contour, Mat const & img)
                                   &spine,
                                   &discreteSpine,
                                   &larvalRadii,
+								  larvaThicknessVector,
                                   tailIndex,
                                   spineLength,
                                   dMin,
@@ -98,8 +99,10 @@ RawLarva::RawLarva(const contour_t& _contour, Mat const & img)
     // set the momentum
     calcMomentum();
 
-    calcIsCoiledIndicator(peri2spineLengthThresh,midCirclePeri2PeriThresh,max2meanRadiusThresh);
-
+	// ############################## TODO ############################################
+	// decide if the coiled indicator is useful for fish; if so, the calculation needs to be changed as well as the GUI of the preferences!
+	isCoiled = false;
+	//calcIsCoiledIndicator(peri2spineLengthThresh,midCirclePeri2PeriThresh,max2meanRadiusThresh);
 }
 
 void RawLarva::calcIsCoiledIndicator(const double peri2spineLengthThresh,

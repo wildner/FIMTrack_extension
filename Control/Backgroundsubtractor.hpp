@@ -50,10 +50,13 @@ signals:
 
 private:
 
+	// indicates if a background image is available, obtained either by calculation or received as a parameter
+	bool _isInitialized = false;
     cv::Mat _backgroundImage;
     int     _stepSize;
 
-    void readImage(std::string const& path, cv::Mat& dst);
+	void readGrayImage(std::string const& path, cv::Mat& dst);
+	void readColorImage(std::string const& path, cv::Mat& dst);
 
     void updateBackgroundImage(cv::Mat const& grayImage);
 
@@ -63,13 +66,19 @@ private:
 
 public:
     Backgroundsubtractor(std::vector<std::string> const& imagePaths, Undistorter const& undist, QObject* parent = 0);
+	/**
+	* @brief initializes the Backgroundsubtractor with a given image; this is useful if the background image is already known and does not need to be calculated.
+	*/
+	Backgroundsubtractor(cv::Mat const& backgroundImage, QObject* parent = 0);
 
-    void substract(cv::Mat const& src, cv::Mat& dst) const;
-
+    void subtract(cv::Mat const& src, cv::Mat& dst) const;
 
     // NOTE: this method might do the same like subtract but in a slightly different fashion...
     // TODO: check for redundance and delete if necessary.
-    void subtractViaThresh(cv::Mat const& src, int const gThresh, cv::Mat& dst) const;
+	void subtractViaThresh(cv::Mat const& src, int const gThresh, cv::Mat& dst) const;
+
+	cv::Mat getBackgroundImage() const { return _backgroundImage.clone(); };
+	bool isInitialized() const { return _isInitialized; };
 };
 
 #endif // BACKGROUNDSUBTRACTOR_HPP

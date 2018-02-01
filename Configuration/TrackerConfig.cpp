@@ -44,11 +44,14 @@ namespace GeneralParameters
     int      iGrayThreshold                                         = 40;
     int      defaultGrayThreshold                                   = iGrayThreshold;
     
-    int      iMinLarvaeArea                                         = 200;
+    int      iMinLarvaeArea                                         = 100;
     int      defaultMinLarvaeArea                                   = iMinLarvaeArea;
     
-    int      iMaxLarvaeArea                                         = 500;
+    int      iMaxLarvaeArea                                         = 800;
     int      deaultMaxLarvaeArea                                    = iMaxLarvaeArea;
+
+	int		 iValleyThreshold										= 0;
+	int		 defaultValleyThreshold									= iValleyThreshold;
     
     bool     bShowTrackingProgress                                  = true;
     bool     defaultShowTrackingProgress                            = true;
@@ -58,6 +61,49 @@ namespace GeneralParameters
     
     bool     bEnableDetailetOutput                                  = true;
     bool     defaultEnableDetailetOutput                            = bEnableDetailetOutput;
+
+	// all pixel neighbourhoods go counter-clockwise like contours! (remark: Point(0,0) lies in the top left corner of the image)
+	std::vector<cv::Vec2i> pixelNeighbourhood8 = std::vector<cv::Vec2i>({
+		cv::Vec2i(1, 1),
+		cv::Vec2i(1, 0),
+		cv::Vec2i(1, -1),
+		cv::Vec2i(0, -1),
+		cv::Vec2i(-1, -1),
+		cv::Vec2i(-1, 0),
+		cv::Vec2i(-1, 1),
+		cv::Vec2i(0, 1) });
+		// all pixel neighbourhoods go counter-clockwise like contours! (remark: Point(0,0) lies in the top left corner of the image)
+	std::vector<cv::Vec2i> pixelNeighbourhood12 = std::vector<cv::Vec2i>({
+		cv::Vec2i(2, 1),
+		cv::Vec2i(2, 0),
+		cv::Vec2i(2, -1),
+		cv::Vec2i(1, -2),
+		cv::Vec2i(0, -2),
+		cv::Vec2i(-1, -2),
+		cv::Vec2i(-2, -1),
+		cv::Vec2i(-2, 0),
+		cv::Vec2i(-2, 1),
+		cv::Vec2i(-1, 2),
+		cv::Vec2i(0, 2),
+		cv::Vec2i(1, 2) });
+		// all pixel neighbourhoods go counter-clockwise like contours! (remark: Point(0,0) lies in the top left corner of the image)
+	std::vector<cv::Vec2i> pixelNeighbourhood16 = std::vector<cv::Vec2i>({
+		cv::Vec2i(2, 2),
+		cv::Vec2i(2, 1),
+		cv::Vec2i(2, 0),
+		cv::Vec2i(2, -1),
+		cv::Vec2i(2, -2),
+		cv::Vec2i(1, -2),
+		cv::Vec2i(0, -2),
+		cv::Vec2i(-1, -2),
+		cv::Vec2i(-2, -2),
+		cv::Vec2i(-2, -1),
+		cv::Vec2i(-2, 0),
+		cv::Vec2i(-2, 1),
+		cv::Vec2i(-2, 2),
+		cv::Vec2i(-1, 2),
+		cv::Vec2i(0, 2),
+		cv::Vec2i(1, 2) });
 }
 
 namespace CameraParameter
@@ -80,10 +126,10 @@ namespace BackgroundSubstraction
     int      iFromImage                                             = 0;
     int      defaultFromImage                                       = iFromImage;
     
-    int      iOffset                                                = 0;
+    int      iOffset                                                = 100;
     int      defaultOffset                                          = iOffset;
     
-    int      iToImage                                               = 0;
+    int      iToImage                                               = 5000;
     int      defaultToImage                                         = iToImage;
 }
 
@@ -103,7 +149,7 @@ namespace LarvaeExtractionParameters
     bool     bUseDefault                                            = true;
     bool     defaultUseDefault                                      = bUseDefault;
     
-    int      iNumerOfSpinePoints                                    = 5;
+    int      iNumerOfSpinePoints                                    = 9;
     int      defaultiNumerOfSpinePoints                             = iNumerOfSpinePoints;
 
     namespace IPANContourCurvatureParameters
@@ -117,7 +163,7 @@ namespace LarvaeExtractionParameters
         int      iMaximalTriangelSideLenght                         = 9;
         int      defaultMaximalTriangelSideLenght                   = iMaximalTriangelSideLenght;
         
-        double   dMaximalCurvaturePointsDistance                    = 0.25;
+        double   dMaximalCurvaturePointsDistance                    = 0.30;
         double   defaultMaximalCurvaturePointsDistance              = dMaximalCurvaturePointsDistance;
         
         int      iCurvatureWindowSize                               = 7;
@@ -126,13 +172,13 @@ namespace LarvaeExtractionParameters
     
     namespace CoiledRecognitionParameters
     {
-        double   dPerimeterToSpinelenghtThreshold                   = 2.4;
+        double   dPerimeterToSpinelenghtThreshold                   = 25.0;
         double   defaultPerimeterToSpinelenghtThreshold             = dPerimeterToSpinelenghtThreshold;
         
-        double   dMidcirclePerimeterToPerimeterThreshold            = 0.6;
+        double   dMidcirclePerimeterToPerimeterThreshold            = 100.0;
         double   defaultMidcirclePerimeterToPerimeterThreshold      = dMidcirclePerimeterToPerimeterThreshold;
 
-        double   dMaxToMeanRadiusThreshold                          = 2.3;
+        double   dMaxToMeanRadiusThreshold                          = 2.5;
         double   defaultMaxToMeanRadiusThreshold                    = dMaxToMeanRadiusThreshold;
     }
     
@@ -165,7 +211,7 @@ namespace LarvaeExtractionParameters
         bool bUseDynamicMovementDirectionParameterCalculation       = true;
         bool defaultUseDynamicMovementDirectionParameterCalculation = bUseDynamicMovementDirectionParameterCalculation;
         
-        int iFramesForMovementDirectionCalculation                  = 10;
+        int iFramesForMovementDirectionCalculation                  = 20;
         int defaultFramesForMovementDirectionCalculation            = iFramesForMovementDirectionCalculation;
     }
 
@@ -192,6 +238,7 @@ namespace TrackerConfig
         GeneralParameters::iGrayThreshold                                                                           = GeneralParameters::defaultGrayThreshold;
         GeneralParameters::iMinLarvaeArea                                                                           = GeneralParameters::defaultMinLarvaeArea;
         GeneralParameters::iMaxLarvaeArea                                                                           = GeneralParameters::deaultMaxLarvaeArea;
+		GeneralParameters::iValleyThreshold																			= GeneralParameters::defaultValleyThreshold;
         GeneralParameters::bShowTrackingProgress                                                                    = GeneralParameters::defaultShowTrackingProgress;
         GeneralParameters::bSaveLog                                                                                 = GeneralParameters::defaultSaveLog;
         GeneralParameters::bEnableDetailetOutput                                                                    = GeneralParameters::defaultEnableDetailetOutput;

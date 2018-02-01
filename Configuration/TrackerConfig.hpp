@@ -69,6 +69,10 @@ namespace FIMTypes
      * @brief contourCurvatureType is used to store curvatures of contour points
      */
     typedef std::vector<double> contourCurvature_t;
+	/**
+	* @brief contourCurvVector is used to store the vectors orthogonal to the curvature tangent
+	*/
+	typedef std::vector<cv::Vec2d> contourCurvVectors_t;
     /**
      * @brief radiiType is used to store the radii of the discrete spine points
      */
@@ -81,6 +85,18 @@ namespace FIMTypes
      * @brief BezierCurves contains several Bezier Curves that approximate a digitized curve
      */
     typedef std::vector<BezierCurve_t> BezierCurves_t;
+	/**
+	* @brief minima stores the indices of maximal concave curvatures of a contour
+	*/
+	typedef std::vector<int> minima_t;
+	/**
+	* @brief maxima stores the indices of maximal convex curvatures of a contour
+	*/
+	typedef std::vector<int> maxima_t;
+	/**
+	* @brief path stores a path between two objects (a "valley" on the image)
+	*/
+	typedef std::vector<cv::Point2i> path_t;
 }
 
 namespace StringConstats 
@@ -94,9 +110,14 @@ namespace GeneralParameters
     extern int      iGrayThreshold;
     extern int      iMinLarvaeArea;
     extern int      iMaxLarvaeArea;
+	extern int		iValleyThreshold;
     extern bool     bShowTrackingProgress;
     extern bool     bSaveLog;
     extern bool     bEnableDetailetOutput;
+
+	extern std::vector<cv::Vec2i> pixelNeighbourhood8;
+	extern std::vector<cv::Vec2i> pixelNeighbourhood12;
+	extern std::vector<cv::Vec2i> pixelNeighbourhood16;
 }
 
 namespace CameraParameter

@@ -72,6 +72,41 @@ namespace Calc
         return retPoint * newLength;
     }
 
+	double medianOfVector(std::vector<double> vec)
+	{
+		unsigned int size = vec.size();
+		if (size < 3)
+		{
+			if (size < 1)
+			{
+				return NULL;
+			}
+			else if (size == 1)
+			{
+				return vec[0];
+			}
+			else
+			{
+				return (vec[0] + vec[1]) / 2.0;
+			}
+		}
+		else
+		{
+			unsigned int halfSize = size / 2;
+			std::nth_element(vec.begin(), vec.begin() + halfSize, vec.end());
+			double midValue = vec[halfSize];
+			if (size % 2 == 1)
+			{
+				return midValue;
+			}
+			else
+			{
+				std::nth_element(vec.begin(), vec.begin() + halfSize - 1, vec.end());
+				return (midValue + vec[halfSize - 1]) / 2.0;
+			}
+		}
+	}
+
     double eucledianDist(Point const& pt1, Point const& pt2)
     {
         return sqrt(std::pow((double)(pt1.x - pt2.x), 2) + std::pow((double)(pt1.y - pt2.y), 2));
@@ -353,6 +388,49 @@ namespace Calc
         return index;
     }
 
+	cv::Vec2i calcCircularPixelNeighbourVector(std::vector<cv::Vec2i> & pixelNeighbourhood, cv::Vec2i & currentVec, const int & offset)
+	{
+		unsigned int currentIdx = std::find(pixelNeighbourhood.begin(), pixelNeighbourhood.end(), currentVec) - pixelNeighbourhood.begin();
+		if (currentIdx < pixelNeighbourhood.size())
+		{
+			return pixelNeighbourhood[calcCircularContourNeighbourIndex(pixelNeighbourhood.size(), currentIdx, offset)];
+		}
+		else
+		{
+			return NULL;
+		}
+	}
+
+	cv::Point calcCircularPixelNeighbourPoint(std::vector<cv::Vec2i> & pixelNeighbourhood, cv::Vec2i & currentVec, cv::Point & currentPoint, const int & offset)
+	{
+		cv::Vec2i newVec = calcCircularPixelNeighbourVector(pixelNeighbourhood, currentVec, offset);
+		// destination point
+		return cv::Point(currentPoint.x + newVec[0], currentPoint.y + newVec[1]);
+	}
+
+	cv::Vec2i calcDiscreteDirectionVector(cv::Vec2d & continuousVec2d)
+	{
+		Vec2d normalizedVec2d = cv::normalize(continuousVec2d);
+		Vec2i destVec2i = Vec2i((int)round(normalizedVec2d[0]), (int)round(normalizedVec2d[1])); // only a first approximation of the direction
+		QPoint pDest = QPoint(destVec2i[0], destVec2i[1]);
+		Vec2i leftNeighbour = Calc::calcCircularPixelNeighbourVector(GeneralParameters::pixelNeighbourhood8, destVec2i, 1);
+		Vec2i rightNeighbour = Calc::calcCircularPixelNeighbourVector(GeneralParameters::pixelNeighbourhood8, destVec2i, -1);
+		QPoint pLeft = QPoint(leftNeighbour[0], leftNeighbour[1]);
+		QPointF pMid = QPointF(normalizedVec2d[0], normalizedVec2d[1]);
+		QPoint pRight = QPoint(rightNeighbour[0], rightNeighbour[1]);
+		if (Calc::calcInnerAngleOfVectors(pLeft, pMid) < Calc::calcInnerAngleOfVectors(pDest, pMid))
+		{
+			return leftNeighbour;
+		}
+		else if (Calc::calcInnerAngleOfVectors(pMid, pRight) < Calc::calcInnerAngleOfVectors(pDest, pMid))
+		{
+			return rightNeighbour;
+		}
+		else
+		{
+			return destVec2i;
+		}
+	}
 
     float minSquaredEuclideanDistanceTo(const contour_t& contour, const Point2f& pt)
     {
@@ -489,4 +567,9 @@ namespace Calc
         return acos(cos_phi) / M_PI * 180;
     }
 
+	int calcContourIndexDistance(int const contourLength, int const idx1, int const idx2)
+	{
+		int trivialDistance = std::abs(idx1 - idx2);
+		return std::min(trivialDistance, (contourLength - trivialDistance));
+	}
 }

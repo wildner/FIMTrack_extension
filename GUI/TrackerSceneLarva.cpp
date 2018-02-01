@@ -43,7 +43,7 @@ TrackerSceneLarva::TrackerSceneLarva(QGraphicsScene *scene,
     this->mShowSilhouette           = true;
     
     this->mHeadTailRadius           = 1.0;
-    this->mID                       = QString("Larva %1").arg(larva->getID());
+    this->mID                       = QString("Fish %1").arg(larva->getID());
     
     this->mScene                    = scene;
     this->mLarva                    = larva;

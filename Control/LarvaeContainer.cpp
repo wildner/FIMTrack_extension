@@ -231,7 +231,7 @@ QStringList LarvaeContainer::getAllContemplableLarvaeIDsForAttach(const uint id)
     {
         if(id != this->mLarvae.at(i).getID())
         {
-            result << QString("Larva %1").arg(this->mLarvae.at(i).getID());
+            result << QString("Fish %1").arg(this->mLarvae.at(i).getID());
         }
     }
     

@@ -104,6 +104,19 @@ private slots:
     void resetListViewe();
     void showMessage(QString msg);
 
+	/**
+	* @brief autoSaveConfig automatically saves the preferences during closing the program
+	*/
+	void autoSaveConfig();
+	/**
+	* @brief autoLoadConfig automatically loads the configuration file, which were saved during closing the program, while starting the program
+	*/
+	void autoLoadConfig();
+	/**
+	* @brief autoLoadImages automatically loads a hard coded set of images (can be used for debugging)
+	*/
+	void autoLoadImages();
+
 private:
     Ui::MainGUI*                ui;
     PreferencesDialogWindow*    _preferencesDialogWindow;
@@ -122,6 +135,13 @@ private:
     cv::Mat                     _trackingPreviewImg;
     
     QString                     _configurationFile;
+	QString						_configAutoSaveDirectory = "config_autosave.conf";
+
+	int							_previousSelectedIndex = INT_MIN;
+	/**
+	* @brief stores a previously calculated background image which can be reused
+	*/
+	cv::Mat						_previousBackgroundImage;
     
     void showImage(QString path);
     void readParameters();

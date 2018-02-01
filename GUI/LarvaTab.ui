@@ -74,7 +74,7 @@
             </font>
            </property>
            <property name="title">
-            <string>Larvaposition has been changed manualy</string>
+            <string>Fish position has been changed manualy</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignHCenter|Qt::AlignTop</set>
@@ -177,7 +177,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Show Larva</string>
+           <string>Show Fish</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -694,7 +694,7 @@
          <string notr="true">Text-align:left</string>
         </property>
         <property name="text">
-         <string>Remove Larva From Results</string>
+         <string>Remove Fish From Results</string>
         </property>
         <property name="icon">
          <iconset resource="Icons.qrc">

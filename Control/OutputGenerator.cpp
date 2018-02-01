@@ -49,6 +49,7 @@ void OutputGenerator::saveConfiguration(const std::string& path)
         out << "iGrayThreshold"         << GeneralParameters::iGrayThreshold;
         out << "iMaxLarvaeArea"         << GeneralParameters::iMaxLarvaeArea;
         out << "iMinLarvaeArea"         << GeneralParameters::iMinLarvaeArea;
+		out << "iValleyThreshold"		<< GeneralParameters::iValleyThreshold;
         
         /* Write CameraParameter */
         out << "dFSP"           << CameraParameter::dFPS;
@@ -114,7 +115,7 @@ void OutputGenerator::writeCSVFile(std::string const& path,
     
     for (size_t i = 0; i < larvae.size(); ++i)
     {
-        ofs << "," << "larva(" << larvae.at(i).getID() << ")";
+        ofs << "," << "fish(" << larvae.at(i).getID() << ")";
     }
     ofs << std::endl;
     
@@ -625,6 +626,48 @@ void OutputGenerator::saveResultImage(const QString& path, const QImage& img)
     cv::imwrite(QtOpencvCore::qstr2str(path), QtOpencvCore::qimg2img(img));
 }
 
+void OutputGenerator::writeDistancesCSVFile(std::string const& path,
+											std::vector<Larva> const& larvae,
+											size_t movieLength)
+{
+	std::ofstream ofs;
+	ofs.open(path.c_str());
+
+	// write column names
+	for (size_t i = 0; i < larvae.size(); ++i)
+	{
+		ofs << "," << "fish(" << larvae.at(i).getID() << ")";
+	}
+	ofs << std::endl;
+
+	// for each fish: write distance to each fish for every time point
+	for (size_t i = 0; i < larvae.size(); ++i)
+	{
+		for (size_t t = 0; t < movieLength; ++t)
+		{
+			ofs << "dst_to_fish[" << larvae.at(i).getID() << "](" << t << ")";
+
+			for (auto const& l : larvae)
+			{
+				ofs << ",";
+				cv::Point p1;
+				cv::Point p2;
+				if (l.getSpineMidPointAt(t, p1) && larvae.at(i).getSpineMidPointAt(t, p2) && l.getID() != larvae.at(i).getID())
+				{
+					std::stringstream str;
+					str << Calc::eucledianDist(p1, p2);
+					ofs << str.str().c_str();
+				}
+			}
+
+			ofs << std::endl;
+		}
+	}
+
+	ofs.flush();
+	ofs.close();
+}
+
 bool OutputGenerator::getTimeIntervall(std::vector<Larva> const& larvae, std::pair<int, int>& timeInterval)
 {
     bool foundSomething = false;
@@ -653,5 +696,4 @@ uint OutputGenerator::getMinimumNumberOfSpinePoints(const std::vector<Larva>& la
     }
     return minNumber;
 }
-
 

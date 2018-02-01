@@ -47,6 +47,11 @@ public:
     SpineIPAN();
     ~SpineIPAN();
 
+	/**
+	* @brief calcContourCurvatures calculates for each point of a contour the corresponding curvature.
+	*/
+	void SpineIPAN::calcContourCurvatures(FIMTypes::contour_t* const _contour, FIMTypes::contourCurvature_t & curvatures, FIMTypes::contourCurvVectors_t & curvVectors, FIMTypes::maxima_t & maximaIndices, FIMTypes::minima_t & minimaIndices);
+
     /**
      * @brief calcSpineParameters calculates the spine, discrete spine and corresponding radii of
      *        a given animal (represented by its contour) using the so called IPAN algorithm for
@@ -78,6 +83,7 @@ public:
                              FIMTypes::spineF_t* const _spine,
                              FIMTypes::spine_t* const _discreteSpine,
                              FIMTypes::radii_t* const _animalRadii,
+							 std::vector<double> &_larvaThicknessVector,
                              unsigned int &_tailIndex,
                              double &_spineLength,
                              unsigned int _dMin,
@@ -106,6 +112,10 @@ private:
      * @brief discreteSpine contains fraction of the spine (e.g. 5 points to describe the larva)
      */
     FIMTypes::spine_t* discreteSpine;
+	/**
+	* @brief minCurvatureIndex stores the index to the minimal curvature point.
+	*/
+	unsigned int minCurvatureIndex;
     /**
      * @brief maxCurvatureIndex stores the index to the maximal curvature point (is equal to 0).
      */
@@ -158,6 +168,16 @@ private:
      * @brief Sets all non-pointer vector member variables to empty vectors
      */
     void clear();
+
+	/**
+	* @brief advancedFirstPass works like ipanFirstPass. In addition, the vector is calculated which is orthogonal to the curvature tangent.
+	*/
+	void advancedFirstPass(FIMTypes::contourCurvature_t & curvatures, FIMTypes::contourCurvVectors_t & curvVectors, unsigned int dMin, unsigned int dMax);
+
+	/**
+	* @brief calcCurvatureExtrema is based on calcMaxCurvatureIndex but the amount of maxima is not limited. The minima are calculated, too (extrema of concave curvatures).
+	*/
+	void SpineIPAN::calcCurvatureExtrema(FIMTypes::contour_t* const _contour, FIMTypes::contourCurvature_t & curvatures, FIMTypes::maxima_t & maximaIndices, FIMTypes::minima_t & minimaIndices, unsigned int maskSize, int distBetweenMaxima);
 
     /**
      * @brief ipanFirstPass calculates the curvatures for every contour point based onthe
@@ -225,7 +245,7 @@ private:
      *        (i.e. firstDiscreteContourHalf and reverseSecondDiscreteContourHalf).
      *
      */
-    void calcSpine();
+	void calcSpine(std::vector<double> &_larvaThicknessVector);
 
     /**
      * @brief calcDiscreteSpine calculates a discrete spine containing nPoints points from
@@ -290,6 +310,11 @@ private:
      * @param gridSize specifies the grid size of distance maps (determined by precision of spine calculation)
      */
     void calcDistanceMaps(uint gridSize);
+
+	/*
+	* @brief helper function to reverse a vector (copied from LarvaContainer)
+	*/
+	template<class T> std::vector<T> reverseVec(std::vector<T> const & v);
 };
 
 #endif // SPINEIPAN_HPP
