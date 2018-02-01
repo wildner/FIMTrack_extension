@@ -1,3 +1,7 @@
+For information about the modification "FIMTrack_extension" for fish tracking see README_FIMTrack-extension-for-fish.txt.
+
+Original README content:
+
 ## What is this repository for?
 
 FIMTrack is a larval tracking program to acquire locomotion trajectories
