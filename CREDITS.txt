@@ -1,0 +1,26 @@
+The FIMTrack Team:
+----------------
+Developed at: Research Group Research Group Computer Vision and Pattern Recognition
+              Department of Mathematics and Computer Science
+              and
+              Institute of Neuro and Behavioural Biology
+              Faculty of Biology
+              University of Münster, Germany
+              http://www.uni-muenster.de/PRIA/en/index.html
+              http://neurobio.uni-muenster.de
+
+              http://fim.uni-muenster.de
+
+----------------
+Main developers:
+
+Benjamin Risse 	<b.risse[AT]uni-muenster[DOT]de>
+Dimitri Berh	<d.berh[AT]uni-muenster[DOT]de>
+
+----------------
+Contributers (alphabetically):
+
+Tim Löpmeier
+Stefan Marczinzik
+Tobias Ries 
+

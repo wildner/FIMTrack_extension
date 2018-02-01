@@ -1,0 +1,61 @@
+Developed by: Research Group Research Group Computer Vision and Pattern Recognition
+              Department of Mathematics and Computer Science
+              and
+              Institute of Neuro and Behavioural Biology
+              Faculty of Biology
+              University of Münster, Germany
+              http://www.uni-muenster.de/PRIA/en/index.html
+              http://neurobio.uni-muenster.de
+
+              http://fim.uni-muenster.de
+
+This license is for non-commercial academic use only.
+For non-academic use see the license specified in the file "LICENSE-gpl.txt".
+To get information about commercial licensing please contact the authors.
+
+You may use, distribute and copy FIMTrack under the terms of the FIMTrack Academic
+License, which is displayed below.
+
+-------------------------------------------------------------------------------
+                    FIMTrack Academic License
+
+Developed by: Research Group Research Group Computer Vision and Pattern Recognition
+              Department of Mathematics and Computer Science
+              and
+              Institute of Neuro and Behavioural Biology
+              Faculty of Biology
+              University of Münster, Germany
+              http://www.uni-muenster.de/PRIA/en/index.html
+              http://neurobio.uni-muenster.de
+              
+              http://fim.uni-muenster.de
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal with
+the Software in an academic environment for research or teaching purposes
+without any monetary gain, including without limitation the rights to use, copy,
+modify, merge, publish, distribute, sublicense and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+  Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimers.
+
+  Redistributions in binary form must reproduce the above copyright notice, this
+  list of conditions and the following disclaimers in the documentation and/or
+  other materials provided with the distribution.
+
+  Neither the names of the Research Group Computer Vision and Pattern Recognition, the
+  Department of Mathematics and Computer Science, the University of Münster, nor
+  the names of its contributors may be used to endorse or promote products
+  derived from this Software without specific prior written permission.
+
+  This Software and its authors have to be cited in publications related
+  to products using this Software or products derived from this Software. Citation 
+  informations can be found in the README.txt file.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE CONTRIBUTORS
+OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.

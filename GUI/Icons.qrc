@@ -1,0 +1,22 @@
+<RCC>
+    <qresource prefix="/ResultViewer/Icons">
+        <file>Icons/color.png</file>
+        <file>Icons/invert.png</file>
+        <file>Icons/landmark.png</file>
+        <file>Icons/pathfinder.png</file>
+        <file>Icons/removeLandmark.png</file>
+        <file>Icons/split.png</file>
+        <file>Icons/unite.png</file>
+        <file>Icons/exit.png</file>
+        <file>Icons/rect2985.png</file>
+        <file>Icons/media-playback-pause.png</file>
+        <file>Icons/media-playback-start.png</file>
+        <file>Icons/media-seek-backward.png</file>
+        <file>Icons/media-seek-forward.png</file>
+        <file>Icons/media-skip-forward.png</file>
+        <file>Icons/media-skip-backward.png</file>
+        <file>Icons/addRegionOfInterest.png</file>
+        <file>Icons/removeRegionOfInterest.png</file>
+        <file>Icons/gnome_list_add.png</file>
+    </qresource>
+</RCC>

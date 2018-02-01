@@ -1,0 +1,22 @@
+Developed by: Research Group Research Group Computer Vision and Pattern Recognition
+              Department of Mathematics and Computer Science
+              and
+              Institute of Neuro and Behavioural Biology
+              Faculty of Biology
+              University of Münster, Germany
+              http://www.uni-muenster.de/PRIA/en/index.html
+              http://neurobio.uni-muenster.de
+
+              http://fim.uni-muenster.de
+
+FIMTrack is available under multiple licenses.
+The different licenses are subject to terms and condition as provided in the
+files specifying the license.
+
+  The file "LICENSE-gpl.txt" specifies the use of FIMTrack with the GPL license.
+
+  The file "LICENSE-academic.txt" specifies the use of FIMTrack with the
+  FIMTrack Academic License for non-commercial academic use.
+
+If you are interested in other licensing models, including a commercial-license,
+please contact the authors at fim@uni-muenster.de.
